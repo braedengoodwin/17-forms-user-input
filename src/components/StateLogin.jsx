@@ -1,72 +1,34 @@
 import React from "react";
 import { useState } from "react";
 import Input from "./Input";
+import { isEmail, isNotEmpty, hasMinLength } from "../util/validation";
+import { useInput } from "../hooks/useInput";
 
 export default function Login() {
-  // const [enteredEmail, setEnteredEmail] = useState("");
-  // const [enteredPassword, setEnteredPassword] = useState('');
+  const {
+    value: emailValue,
+    handleInputChange: handleEmailChange,
+    handleInputBlur: handleEmailBlur,
+    hasError: emailHasError,
+  } = useInput("", (value) => isEmail(value) && isNotEmpty(value));
 
-  // this is a combined state for both inputs, an object that holds the values
-  const [enteredValues, setEnteredValues] = useState({
-    email: "",
-    password: "",
-  });
+  const {
+    value: passwordValue,
+    handleInputChange: handlePasswordChange,
+    handleInputBlur: handlePasswordBlur,
+    hasError: passwordHasError,
+  } = useInput("", (value) => hasMinLength(value, 6));
 
-  const [didEdit, setDidEdit] = useState({
-    email: false,
-    password: false,
-  });
-
-  const emailIsInvalid = didEdit.email && !enteredValues.email.includes("@");
-  const passwordIsInvalid =
-    didEdit.password && enteredValues.password.trim().length < 6;
 
   //typical way of handling submit to stop page from refreshing
   function handleSubmit(event) {
     event.preventDefault();
 
-    //maybe add form submission validation here since they can just submit
-    //if()
-
-    // resetting values if reset clicked
-    setEnteredValues({
-      email: "",
-      password: "",
-    });
+    if (emailHasError || passwordHasError){
+      return
+    }
+    console.log(emailValue, passwordValue)
   }
-
-  // generic handling function where we call setEnteredValues and then we update one of the values in the useState object
-  // we get an identifier of the input for the event that occured, value is just 'event' but with a different name since we get event.target.value in actual input fields
-  // we get previous state snapshot with prevValues and return new state snapshot as a new object
-  // then we paste in the existing key value pairs with spread operator '...'
-  // then we update the field thats identified with the identifier
-  // [] is js syntax that allows us to dynamically access a property in an object
-  function handleInputChange(identifier, value) {
-    setEnteredValues((prevValues) => ({
-      ...prevValues,
-      [identifier]: value,
-    }));
-    // resetting the lose focus to false for better user exp
-    setDidEdit((prevEdit) => ({
-      ...prevEdit,
-      [identifier]: false,
-    }));
-  }
-
-  function handleInputBlur(identifier) {
-    setDidEdit((prevEdit) => ({
-      ...prevEdit,
-      [identifier]: true,
-    }));
-  }
-
-  // function handleEmailChange(event) {
-  //   setEnteredEmail(event.target.value);
-  // }
-
-  // function handlePasswordChange(event) {
-  //   setEnteredPassword(event.target.value);
-  // }
 
   return (
     <form onSubmit={handleSubmit}>
@@ -78,10 +40,10 @@ export default function Login() {
           id="email"
           type="email"
           name="email"
-          onBlur={() => handleInputBlur("email")}
-          onChange={(event) => handleInputChange("email", event.target.value)}
-          value={enteredValues.email}
-          error={emailIsInvalid && 'Please enter a valid email'}
+          onBlur={handleEmailBlur}
+          onChange={handleEmailChange}
+          value={emailValue}
+          error={emailHasError && "Please enter a valid email"}
         />
 
         <Input
@@ -89,12 +51,10 @@ export default function Login() {
           id="password"
           type="password"
           name="password"
-          onBlur={() => handleInputBlur("password")}
-          onChange={(event) =>
-            handleInputChange("password", event.target.value)
-          }
-          value={enteredValues.password}
-          error={passwordIsInvalid && 'Please enter a valid password'}
+          onBlur={handlePasswordBlur}
+          onChange={handlePasswordChange}
+          value={passwordValue}
+          error={passwordHasError && "Please enter a valid password"}
         />
       </div>
 
